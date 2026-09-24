@@ -1,0 +1,15 @@
+meta {
+  name: Auditoria da Reserva
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/api/auditoria/reserva/{{reservaId}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  reservaId: 00000000-0000-0000-0000-000000000000
+}

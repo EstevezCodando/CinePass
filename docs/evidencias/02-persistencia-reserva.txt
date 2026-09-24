@@ -1,0 +1,42 @@
+
+==================================================================
+2. ALTERAÇÃO PERSISTIDA NO reserva-service (reservaId=893a19ad-9598-4083-9bb2-4029c44516b9)
+==================================================================
+                  id                  |   status   | valor_total |             pagamento_id             |             ingresso_id              |           criada_em           
+--------------------------------------+------------+-------------+--------------------------------------+--------------------------------------+-------------------------------
+ 893a19ad-9598-4083-9bb2-4029c44516b9 | CONFIRMADA |       79.80 | ea2d6c35-e253-46bd-875b-c87f3cdb7fc2 | 69a714a0-cbe1-4c73-9e99-403840c5f17b | 2026-09-23 18:52:08.354889+00
+(1 row)
+
+--- outbox: eventos gravados na mesma transação da reserva e depois publicados ---
+        event_type        |  status   |          created_at           |         published_at          |      correlation_id      
+--------------------------+-----------+-------------------------------+-------------------------------+--------------------------
+ ReservaCriada            | PUBLICADO | 2026-09-23 18:52:08.383044+00 | 2026-09-23 18:52:10.47849+00  | evidencia-20260923155207
+ ReservaPagamentoAprovado | PUBLICADO | 2026-09-23 18:52:09.203083+00 | 2026-09-23 18:52:10.506991+00 | evidencia-20260923155207
+ ReservaConfirmada        | PUBLICADO | 2026-09-23 18:52:09.856869+00 | 2026-09-23 18:52:10.527317+00 | evidencia-20260923155207
+(3 rows)
+
+--- logs do reserva-service ---
+2026-09-23 18:52:08.388 INFO  service=reserva-service traceId=6ab41fd89de166800237a007687112d3 spanId=2720be7d0b0420c2 correlationId=evidencia-20260923155207 reservaId= thread=http-nio-8081-exec-2 logger=b.c.c.r.i.outbox.OutboxEventWriter - reserva.outbox.registrado reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=33bfceaa-1ff5-40f3-b700-45a28d1247f8 eventType=ReservaCriada correlationId=evidencia-20260923155207
+2026-09-23 18:52:08.388 INFO  service=reserva-service traceId=6ab41fd89de166800237a007687112d3 spanId=2720be7d0b0420c2 correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 thread=http-nio-8081-exec-2 logger=b.c.c.r.a.ReservaApplicationService - reserva.persistida reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 status=AGUARDANDO_PAGAMENTO eventos=1
+2026-09-23 18:52:09.205 INFO  service=reserva-service traceId=6ab41fd89de166800237a007687112d3 spanId=2720be7d0b0420c2 correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 thread=http-nio-8081-exec-2 logger=b.c.c.r.i.outbox.OutboxEventWriter - reserva.outbox.registrado reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=3ec38043-0349-4442-991c-b56de1ba9cc5 eventType=ReservaPagamentoAprovado correlationId=evidencia-20260923155207
+2026-09-23 18:52:09.205 INFO  service=reserva-service traceId=6ab41fd89de166800237a007687112d3 spanId=2720be7d0b0420c2 correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 thread=http-nio-8081-exec-2 logger=b.c.c.r.a.ReservaApplicationService - reserva.persistida reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 status=EMITINDO_INGRESSO eventos=1
+2026-09-23 18:52:09.862 INFO  service=reserva-service traceId=6ab41fd89de166800237a007687112d3 spanId=2720be7d0b0420c2 correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 thread=http-nio-8081-exec-2 logger=b.c.c.r.i.outbox.OutboxEventWriter - reserva.outbox.registrado reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada correlationId=evidencia-20260923155207
+2026-09-23 18:52:09.863 INFO  service=reserva-service traceId=6ab41fd89de166800237a007687112d3 spanId=2720be7d0b0420c2 correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 thread=http-nio-8081-exec-2 logger=b.c.c.r.a.ReservaApplicationService - reserva.persistida reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 status=CONFIRMADA eventos=1
+2026-09-23 18:52:09.865 INFO  service=reserva-service traceId=6ab41fd89de166800237a007687112d3 spanId=2720be7d0b0420c2 correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 thread=http-nio-8081-exec-2 logger=b.c.c.r.a.ReservaApplicationService - reserva.realizacao.sucesso reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 status=CONFIRMADA pagamentoId=ea2d6c35-e253-46bd-875b-c87f3cdb7fc2 ingressoId=69a714a0-cbe1-4c73-9e99-403840c5f17b
+
+==================================================================
+2b. CONSISTÊNCIA: reserva que falha na emissão do ingresso não deixa evento na outbox
+==================================================================
+HTTP/1.1 500 Internal Server Error
+{"detail":"O pagamento foi aprovado, mas a emissão do ingresso falhou. A transação local será revertida, porém o pagamento remoto continuará confirmado.","instance":"/api/reservas","status":500,"title":"Inconsistência distribuída proposital","reservaId":"1afc7744-869e-43ca-9f99-1fdfa958431f","pagamentoId":"e0eee587-aad1-49d9-a167-852cf34768c9","proximoPassoDaAula":"Implementar compensação com Saga Pattern"}
+
+ reservas_com_esse_id 
+----------------------
+                    0
+(1 row)
+
+ eventos_na_outbox 
+-------------------
+                 0
+(1 row)
+

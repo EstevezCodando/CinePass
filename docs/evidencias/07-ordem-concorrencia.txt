@@ -1,0 +1,53 @@
+
+==================================================================
+7. ORDEM POR RESERVA + PROCESSAMENTO CONCORRENTE ENTRE RESERVAS
+==================================================================
+Criando 6 reservas em sequência rápida (assentos A3, A4, A5, B1, B2, B3)...
+  A3: HTTP/1.1 201 Created
+  A4: HTTP/1.1 201 Created
+  A5: HTTP/1.1 201 Created
+  B1: HTTP/1.1 201 Created
+  B2: HTTP/1.1 201 Created
+  B3: HTTP/1.1 201 Created
+--- auditoria: por reserva, a ordem de processamento (recebido_em) segue a ordem de produção (offset) ---
+              reserva_id              |        event_type        | particao | offset_kafka |          recebido_em          
+--------------------------------------+--------------------------+----------+--------------+-------------------------------
+ 21925f3e-1156-4a78-a0ac-abda21b43bf8 | ReservaCriada            |        0 |            5 | 2026-09-23 18:52:59.191402+00
+ 21925f3e-1156-4a78-a0ac-abda21b43bf8 | ReservaPagamentoAprovado |        0 |            6 | 2026-09-23 18:52:59.222759+00
+ 21925f3e-1156-4a78-a0ac-abda21b43bf8 | ReservaConfirmada        |        0 |            7 | 2026-09-23 18:52:59.265388+00
+ 3ac54f22-c883-46a6-9905-49faa7566c57 | ReservaCriada            |        5 |            6 | 2026-09-23 18:52:59.363626+00
+ 3ac54f22-c883-46a6-9905-49faa7566c57 | ReservaPagamentoAprovado |        5 |            7 | 2026-09-23 18:52:59.421657+00
+ 3ac54f22-c883-46a6-9905-49faa7566c57 | ReservaConfirmada        |        5 |            8 | 2026-09-23 18:52:59.602257+00
+ 5c3c5b52-b0d1-41a7-a5ac-40795a9663a9 | ReservaCriada            |        4 |            0 | 2026-09-23 18:52:59.297456+00
+ 5c3c5b52-b0d1-41a7-a5ac-40795a9663a9 | ReservaPagamentoAprovado |        4 |            1 | 2026-09-23 18:52:59.331348+00
+ 5c3c5b52-b0d1-41a7-a5ac-40795a9663a9 | ReservaConfirmada        |        4 |            2 | 2026-09-23 18:52:59.398616+00
+ 6e26c888-033b-4e12-949c-bba81166faa7 | ReservaCriada            |        5 |            3 | 2026-09-23 18:52:58.611696+00
+ 6e26c888-033b-4e12-949c-bba81166faa7 | ReservaPagamentoAprovado |        5 |            4 | 2026-09-23 18:52:58.652549+00
+ 6e26c888-033b-4e12-949c-bba81166faa7 | ReservaConfirmada        |        5 |            5 | 2026-09-23 18:52:58.670636+00
+ 73ad50de-d074-4b8d-8ec6-f55f9ab7e143 | ReservaCriada            |        3 |            0 | 2026-09-23 18:52:58.389144+00
+ 73ad50de-d074-4b8d-8ec6-f55f9ab7e143 | ReservaPagamentoAprovado |        3 |            1 | 2026-09-23 18:52:58.43073+00
+ 73ad50de-d074-4b8d-8ec6-f55f9ab7e143 | ReservaConfirmada        |        3 |            2 | 2026-09-23 18:52:58.523856+00
+ dcecb85f-d4fb-4b88-95d2-e01e675100b2 | ReservaCriada            |        5 |            0 | 2026-09-23 18:52:58.510569+00
+ dcecb85f-d4fb-4b88-95d2-e01e675100b2 | ReservaPagamentoAprovado |        5 |            1 | 2026-09-23 18:52:58.547564+00
+ dcecb85f-d4fb-4b88-95d2-e01e675100b2 | ReservaConfirmada        |        5 |            2 | 2026-09-23 18:52:58.582069+00
+(18 rows)
+
+--- threads do listener (auditoria-service): partições diferentes processadas por threads diferentes ---
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-0-C-1 partition=0 ReservaConfirmada reserva=21925f3e-1156-4a78-a0ac-abda21b43bf8
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-0-C-1 partition=0 ReservaCriada reserva=21925f3e-1156-4a78-a0ac-abda21b43bf8
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-0-C-1 partition=0 ReservaPagamentoAprovado reserva=21925f3e-1156-4a78-a0ac-abda21b43bf8
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-1-C-1 partition=3 ReservaConfirmada reserva=73ad50de-d074-4b8d-8ec6-f55f9ab7e143
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-1-C-1 partition=3 ReservaCriada reserva=73ad50de-d074-4b8d-8ec6-f55f9ab7e143
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-1-C-1 partition=3 ReservaPagamentoAprovado reserva=73ad50de-d074-4b8d-8ec6-f55f9ab7e143
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=4 ReservaConfirmada reserva=5c3c5b52-b0d1-41a7-a5ac-40795a9663a9
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=4 ReservaCriada reserva=5c3c5b52-b0d1-41a7-a5ac-40795a9663a9
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=4 ReservaPagamentoAprovado reserva=5c3c5b52-b0d1-41a7-a5ac-40795a9663a9
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=5 ReservaConfirmada reserva=3ac54f22-c883-46a6-9905-49faa7566c57
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=5 ReservaConfirmada reserva=6e26c888-033b-4e12-949c-bba81166faa7
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=5 ReservaConfirmada reserva=dcecb85f-d4fb-4b88-95d2-e01e675100b2
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=5 ReservaCriada reserva=3ac54f22-c883-46a6-9905-49faa7566c57
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=5 ReservaCriada reserva=6e26c888-033b-4e12-949c-bba81166faa7
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=5 ReservaCriada reserva=dcecb85f-d4fb-4b88-95d2-e01e675100b2
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=5 ReservaPagamentoAprovado reserva=3ac54f22-c883-46a6-9905-49faa7566c57
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=5 ReservaPagamentoAprovado reserva=6e26c888-033b-4e12-949c-bba81166faa7
+thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-2-C-1 partition=5 ReservaPagamentoAprovado reserva=dcecb85f-d4fb-4b88-95d2-e01e675100b2

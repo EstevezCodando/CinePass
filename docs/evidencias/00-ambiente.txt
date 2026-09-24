@@ -1,0 +1,30 @@
+
+==================================================================
+AMBIENTE — containers e serviços registrados no Eureka
+==================================================================
+NAMES                    STATUS
+cinepass-gateway         Up 2 minutes
+cinepass-notificacao     Up 2 minutes
+cinepass-fidelidade      Up 2 minutes
+cinepass-auditoria       Up 2 minutes
+cinepass-reserva         Up 2 minutes
+cinepass-temporal-ui     Up 3 minutes
+cinepass-temporal        Up 3 minutes
+cinepass-ingresso        Up 3 minutes
+cinepass-kafka-ui        Up 2 minutes
+cinepass-pagamento       Up 3 minutes
+cinepass-logstash        Up About a minute
+cinepass-kibana          Up About a minute
+cinepass-postgres        Up 3 minutes (healthy)
+cinepass-kafka           Up 3 minutes (healthy)
+cinepass-discovery       Up 3 minutes
+cinepass-elasticsearch   Up 3 minutes (healthy)
+cinepass-zipkin          Up 3 minutes (healthy)
+
+"name":"API-GATEWAY"
+"name":"AUDITORIA-SERVICE"
+"name":"FIDELIDADE-SERVICE"
+"name":"INGRESSO-SERVICE"
+"name":"NOTIFICACAO-SERVICE"
+"name":"PAGAMENTO-SERVICE"
+"name":"RESERVA-SERVICE"

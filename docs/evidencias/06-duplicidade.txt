@@ -1,0 +1,47 @@
+
+==================================================================
+6. MENSAGEM DUPLICADA — reentrega do MESMO ReservaConfirmada (mesmo eventId)
+==================================================================
+eventId reenviado: 914c5931-047b-4394-98c6-83c5671fef57
+
+ANTES da reentrega:
+ reservas_confirmadas | pontos | valor_total_gasto 
+----------------------+--------+-------------------
+                    1 |     79 |             79.80
+(1 row)
+
+ notificacoes_da_reserva 
+-------------------------
+                       3
+(1 row)
+
+ registros_de_auditoria 
+------------------------
+                      3
+(1 row)
+
+$ (republica a mesma mensagem 2x no tópico, com a mesma chave)
+
+DEPOIS da reentrega (os valores devem ser os mesmos):
+ reservas_confirmadas | pontos | valor_total_gasto 
+----------------------+--------+-------------------
+                    1 |     79 |             79.80
+(1 row)
+
+ notificacoes_da_reserva 
+-------------------------
+                       3
+(1 row)
+
+ registros_de_auditoria 
+------------------------
+                      3
+(1 row)
+
+--- logs: reconhecimento da duplicidade ---
+2026-09-23 18:52:47.665 INFO  service=notificacao-service traceId=6ab41fffd724928bde6b3c8de538d285 spanId=de6b3c8de538d285 correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=914c5931-047b-4394-98c6-83c5671fef57 thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-0-C-1 logger=b.c.c.n.a.NotificacaoApplicationService - notificacao.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada reservaId=893a19ad-9598-4083-9bb2-4029c44516b9
+2026-09-23 18:52:47.683 INFO  service=notificacao-service traceId=6ab41fffad26e19c0185342d4772f9c9 spanId=0185342d4772f9c9 correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=914c5931-047b-4394-98c6-83c5671fef57 thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-0-C-1 logger=b.c.c.n.a.NotificacaoApplicationService - notificacao.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada reservaId=893a19ad-9598-4083-9bb2-4029c44516b9
+2026-09-23 18:52:47.656 INFO  service=fidelidade-service traceId=6ab41fff09593646dfa18ed2d4d7e29c spanId=dfa18ed2d4d7e29c correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=914c5931-047b-4394-98c6-83c5671fef57 thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-0-C-1 logger=b.c.c.f.a.FidelidadeApplicationService - fidelidade.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada reservaId=893a19ad-9598-4083-9bb2-4029c44516b9
+2026-09-23 18:52:47.670 INFO  service=fidelidade-service traceId=6ab41fff081fdb6a9462888be19487b0 spanId=9462888be19487b0 correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=914c5931-047b-4394-98c6-83c5671fef57 thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-0-C-1 logger=b.c.c.f.a.FidelidadeApplicationService - fidelidade.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada reservaId=893a19ad-9598-4083-9bb2-4029c44516b9
+2026-09-23 18:52:47.656 INFO  service=auditoria-service traceId=6ab41fff8cc3b865ed97e0ee07ad165d spanId=ed97e0ee07ad165d correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=914c5931-047b-4394-98c6-83c5671fef57 thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-0-C-1 logger=b.c.c.a.a.AuditoriaApplicationService - auditoria.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada reservaId=893a19ad-9598-4083-9bb2-4029c44516b9
+2026-09-23 18:52:47.680 INFO  service=auditoria-service traceId=6ab41fffa9e98b9d685a4e5a3b4bbd65 spanId=685a4e5a3b4bbd65 correlationId=evidencia-20260923155207 reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=914c5931-047b-4394-98c6-83c5671fef57 thread=org.springframework.kafka.KafkaListenerEndpointContainer#0-0-C-1 logger=b.c.c.a.a.AuditoriaApplicationService - auditoria.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada reservaId=893a19ad-9598-4083-9bb2-4029c44516b9

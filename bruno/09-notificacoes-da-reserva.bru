@@ -1,0 +1,15 @@
+meta {
+  name: Notificacoes da Reserva
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/notificacoes/reserva/{{reservaId}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  reservaId: 00000000-0000-0000-0000-000000000000
+}

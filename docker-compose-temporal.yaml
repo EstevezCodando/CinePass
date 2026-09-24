@@ -1,0 +1,80 @@
+services:
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: cinepass-postgres
+    environment:
+      POSTGRES_USER: cinepass
+      POSTGRES_PASSWORD: cinepass
+      POSTGRES_DB: postgres
+    ports:
+      - "25432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+
+  postgresql:
+    image: postgres:16
+    container_name: temporal-postgresql
+
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - temporal-postgres-data:/var/lib/postgresql/data
+
+    networks:
+      - temporal-network
+
+
+  temporal:
+    image: temporalio/auto-setup:latest
+    container_name: temporal
+
+    depends_on:
+      - postgresql
+
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: temporal
+      POSTGRES_PWD: temporal
+      POSTGRES_SEEDS: postgresql
+
+    ports:
+      - "7233:7233"
+
+    networks:
+      - temporal-network
+
+
+  temporal-ui:
+    image: temporalio/ui:latest
+    container_name: temporal-ui
+
+    depends_on:
+      - temporal
+
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+
+    ports:
+      - "28081:8080"
+
+    networks:
+      - temporal-network
+
+
+networks:
+  temporal-network:
+    driver: bridge
+
+
+volumes:
+  temporal-postgres-data:
+  postgres-data:

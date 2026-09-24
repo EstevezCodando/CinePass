@@ -1,0 +1,72 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  temporal:
+    namespace: default
+    connection:
+      target: ${TEMPORAL_ADDRESS:localhost:7233}
+    workers:
+      - task-queue: cinepass-reserva
+    workers-auto-discovery:
+      enabled: true
+      workflow-packages:
+        - br.com.cinepass.reserva.infrastructure.temporal.workflow
+  application:
+    name: reserva-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:25432/cinepass_db}
+    username: ${DB_USERNAME:cinepass}
+    password: ${DB_PASSWORD:cinepass}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+    template:
+      observation-enabled: true
+
+cinepass:
+  kafka:
+    topics:
+      reserva-eventos: reserva.eventos
+      reserva-eventos-particoes: 6
+  outbox:
+    poll-interval-ms: 500
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  tracing:
+    sampling:
+      probability: 1.0
+    export:
+      zipkin:
+        endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level service=${spring.application.name} traceId=%X{traceId:-} spanId=%X{spanId:-} correlationId=%X{correlationId:-} reservaId=%X{reservaId:-} thread=%thread logger=%logger{36} - %msg%n"
+  logstash:
+    host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5000}

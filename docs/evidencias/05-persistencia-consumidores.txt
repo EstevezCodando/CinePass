@@ -1,0 +1,28 @@
+
+==================================================================
+5. PERSISTÊNCIA NOS SERVIÇOS CONSUMIDORES (cada um no seu banco)
+==================================================================
+--- notificacao_db ---
+        tipo        |           destinatario_id            |                                mensagem                                 |           criada_em           
+--------------------+--------------------------------------+-------------------------------------------------------------------------+-------------------------------
+ RESERVA_CRIADA     | 33333333-3333-3333-3333-155207000000 | Recebemos sua reserva dos assentos [A1, A2]. Aguardando o pagamento.    | 2026-09-23 18:52:12.187561+00
+ PAGAMENTO_APROVADO | 33333333-3333-3333-3333-155207000000 | O pagamento de R$ 79.80 foi aprovado. Estamos emitindo seu ingresso.    | 2026-09-23 18:52:12.289747+00
+ RESERVA_CONFIRMADA | 33333333-3333-3333-3333-155207000000 | Reserva confirmada! Seu ingresso para os assentos [A1, A2] foi emitido. | 2026-09-23 18:52:12.308392+00
+(3 rows)
+
+--- fidelidade_db ---
+              cliente_id              | reservas_confirmadas | ingressos_comprados | valor_total_gasto | pontos 
+--------------------------------------+----------------------+---------------------+-------------------+--------
+ 33333333-3333-3333-3333-155207000000 |                    1 |                   2 |             79.80 |     79
+(1 row)
+
+--- auditoria_db ---
+        event_type        |               event_id               |      correlation_id      |          occurred_at          |          recebido_em          | particao | offset_kafka 
+--------------------------+--------------------------------------+--------------------------+-------------------------------+-------------------------------+----------+--------------
+ ReservaCriada            | 33bfceaa-1ff5-40f3-b700-45a28d1247f8 | evidencia-20260923155207 | 2026-09-23 18:52:08.355274+00 | 2026-09-23 18:52:11.964417+00 |        0 |            0
+ ReservaPagamentoAprovado | 3ec38043-0349-4442-991c-b56de1ba9cc5 | evidencia-20260923155207 | 2026-09-23 18:52:09.200136+00 | 2026-09-23 18:52:12.136278+00 |        0 |            1
+ ReservaConfirmada        | 914c5931-047b-4394-98c6-83c5671fef57 | evidencia-20260923155207 | 2026-09-23 18:52:09.853122+00 | 2026-09-23 18:52:12.194957+00 |        0 |            2
+(3 rows)
+
+--- consulta via API Gateway: GET /api/fidelidade/33333333-3333-3333-3333-155207000000 ---
+{"clienteId":"33333333-3333-3333-3333-155207000000","reservasConfirmadas":1,"ingressosComprados":2,"valorTotalGasto":79.80,"pontos":79}

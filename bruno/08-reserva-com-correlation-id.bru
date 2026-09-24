@@ -1,0 +1,25 @@
+meta {
+  name: Reserva - com X-Correlation-Id
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/reservas
+  body: json
+  auth: none
+}
+
+headers {
+  X-Correlation-Id: demo-001
+}
+
+body:json {
+  {
+    "clienteId": "33333333-3333-3333-3333-333333333333",
+    "sessaoId": "22222222-2222-2222-2222-222222222222",
+    "assentos": ["B1"],
+    "simularRecusaPagamento": false,
+    "simularFalhaIngresso": false
+  }
+}

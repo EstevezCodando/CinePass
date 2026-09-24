@@ -1,0 +1,77 @@
+### Eureka
+GET http://localhost:8761
+
+### Filmes via Gateway
+GET http://localhost:8080/api/filmes
+
+### Sessoes via Gateway
+GET http://localhost:8080/api/sessoes
+
+### Caminho feliz
+POST http://localhost:8080/api/reservas
+Content-Type: application/json
+
+{
+  "clienteId": "33333333-3333-3333-3333-333333333333",
+  "sessaoId": "22222222-2222-2222-2222-222222222222",
+  "assentos": ["A1"],
+  "simularRecusaPagamento": false,
+  "simularFalhaIngresso": false
+}
+
+### Pagamento recusado
+POST http://localhost:8080/api/reservas
+Content-Type: application/json
+
+{
+  "clienteId": "33333333-3333-3333-3333-333333333333",
+  "sessaoId": "22222222-2222-2222-2222-222222222222",
+  "assentos": ["A2"],
+  "simularRecusaPagamento": true,
+  "simularFalhaIngresso": false
+}
+
+### Falha distribuida proposital - guarde reservaId e pagamentoId retornados no erro
+POST http://localhost:8080/api/reservas
+Content-Type: application/json
+
+{
+  "clienteId": "33333333-3333-3333-3333-333333333333",
+  "sessaoId": "22222222-2222-2222-2222-222222222222",
+  "assentos": ["A3"],
+  "simularRecusaPagamento": false,
+  "simularFalhaIngresso": true
+}
+
+### Troque pelo pagamentoId recebido acima
+GET http://localhost:8080/api/pagamentos/00000000-0000-0000-0000-000000000000
+
+### Troque pelo reservaId recebido acima
+GET http://localhost:8080/api/reservas/00000000-0000-0000-0000-000000000000
+
+### ================= Assessment: eventos, consumidores e observabilidade =================
+
+### Reserva com correlationId proprio (aparece em todos os logs, no Kibana e no Zipkin)
+POST http://localhost:8080/api/reservas
+Content-Type: application/json
+X-Correlation-Id: demo-001
+
+{
+  "clienteId": "33333333-3333-3333-3333-333333333333",
+  "sessaoId": "22222222-2222-2222-2222-222222222222",
+  "assentos": ["B1"],
+  "simularRecusaPagamento": false,
+  "simularFalhaIngresso": false
+}
+
+### Notificacoes registradas pelo notificacao-service (troque pelo reservaId)
+GET http://localhost:8080/api/notificacoes/reserva/00000000-0000-0000-0000-000000000000
+
+### Todas as notificacoes
+GET http://localhost:8080/api/notificacoes
+
+### Historico de fidelidade do cliente
+GET http://localhost:8080/api/fidelidade/33333333-3333-3333-3333-333333333333
+
+### Trilha de auditoria da reserva (troque pelo reservaId)
+GET http://localhost:8080/api/auditoria/reserva/00000000-0000-0000-0000-000000000000

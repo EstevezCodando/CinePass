@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>br.com.cinepass</groupId>
+    <artifactId>cinepass-saga-base</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>CinePass Saga Base</name>
+
+    <modules>
+        <module>discovery-server</module>
+        <module>api-gateway</module>
+        <module>reserva-service</module>
+        <module>pagamento-service</module>
+        <module>ingresso-service</module>
+        <module>notificacao-service</module>
+        <module>fidelidade-service</module>
+        <module>auditoria-service</module>
+    </modules>
+</project>
