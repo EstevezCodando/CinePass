@@ -38,7 +38,7 @@ Cliente → API Gateway → reserva-service → (HTTP) pagamento / ingresso
 ```
 
 1. **API Gateway** (`CorrelationIdGatewayFilter`): usa o `X-Correlation-Id` do cliente ou gera um UUID, repassa ao serviço de destino e devolve na resposta. Como o Gateway é reativo, o valor vai no log como campo estruturado (`StructuredArguments`).
-2. **reserva-service** (`CorrelationIdFilter`): coloca o valor no MDC. O `OutboxEventWriter` o grava no envelope do evento, e o `HttpClientConfig` o repassa nas chamadas HTTP internas para o pagamento-service e o ingresso-service.
+2. **reserva-service** (`CorrelationIdFilter`): coloca o valor no MDC (ou gera um, se a chamada não passou pelo Gateway). No fluxo `/api/reservas/temporal`, o `CorrelationIdContextPropagator` leva o valor do MDC para o workflow e para as activities do Temporal, que rodam em outras threads. O `OutboxEventWriter` o grava no envelope do evento, e o `HttpClientConfig` o repassa nas chamadas HTTP internas para o pagamento-service e o ingresso-service.
 3. **pagamento-service / ingresso-service**: também têm um `CorrelationIdFilter`, então seus logs aparecem na mesma busca.
 4. **Kafka**: o `correlationId` vai no payload e no header.
 5. **Consumidores**: cada listener recoloca `correlationId`, `reservaId`, `eventId` e `eventType` no MDC antes de processar.

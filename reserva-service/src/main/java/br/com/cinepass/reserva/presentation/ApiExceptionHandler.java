@@ -25,6 +25,15 @@ public class ApiExceptionHandler {
         p.setTitle("Pagamento recusado"); p.setProperty("reservaId", ex.getReservaId()); return p;
     }
 
+    @ExceptionHandler(ReservaCompensadaException.class)
+    ProblemDetail reservaCompensada(ReservaCompensadaException ex){
+        var p=ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        p.setTitle("Reserva cancelada por compensação da Saga");
+        p.setProperty("reservaId", ex.getReservaId());
+        p.setProperty("pagamentoId", ex.getPagamentoId());
+        return p;
+    }
+
     @ExceptionHandler(FalhaProcessamentoReservaException.class)
     ProblemDetail falhaDistribuida(FalhaProcessamentoReservaException ex){
         var p=ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());

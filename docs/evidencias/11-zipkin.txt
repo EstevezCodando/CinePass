@@ -2,8 +2,8 @@
 ==================================================================
 11. TRACE NO ZIPKIN
 ==================================================================
-traceId da reserva: 6ab41fd89de166800237a007687112d3
---- serviços e spans do trace (API do Zipkin: /api/v2/trace/6ab41fd89de166800237a007687112d3) ---
+traceId da reserva: 6ab58c7b1284ab7169d840d8bbab9797
+--- serviços e spans do trace (API do Zipkin: /api/v2/trace/6ab58c7b1284ab7169d840d8bbab9797) ---
       2 api-gateway  ->  http post
       3 auditoria-service  ->  reserva.eventos process
       3 fidelidade-service  ->  reserva.eventos process
@@ -17,4 +17,4 @@ traceId da reserva: 6ab41fd89de166800237a007687112d3
       1 reserva-service  ->  outbox publicar reservapagamentoaprovado
       3 reserva-service  ->  reserva.eventos send
 
-Visualização: http://localhost:9411/zipkin/traces/6ab41fd89de166800237a007687112d3
+Visualização: http://localhost:9411/zipkin/traces/6ab58c7b1284ab7169d840d8bbab9797

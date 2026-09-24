@@ -67,7 +67,7 @@ paralelo.
 | `eventVersion` | int | sim | Versão do formato do payload. |
 | `occurredAt` | ISO-8601 (UTC) | sim | Quando o evento de domínio ocorreu. |
 | `reservaId` | UUID | sim | Reserva relacionada (Aggregate de origem). |
-| `correlationId` | string | não* | Correlação da operação, propagada desde o API Gateway. *Vazio só quando o evento nasce fora de uma requisição HTTP (fluxo Temporal). |
+| `correlationId` | string | sim | Correlação da operação, propagada desde o API Gateway (ou gerada pelo reserva-service quando a chamada chega sem o header). No fluxo Temporal, chega às activities pelo `CorrelationIdContextPropagator`. |
 | `producer` | string | sim | `reserva-service`. |
 | `data` | objeto | sim | Dados específicos de cada evento. |
 
@@ -226,7 +226,7 @@ duplicidade, pois a operação é aditiva.
   "eventVersion": 1,
   "occurredAt": "2026-09-23T14:10:00.000Z",
   "reservaId": "8f3a2b1c-0d4e-4f5a-9b6c-7d8e9f0a1b2c",
-  "correlationId": null,
+  "correlationId": "teste-temporal-001",
   "producer": "reserva-service",
   "data": {
     "reservaId": "8f3a2b1c-0d4e-4f5a-9b6c-7d8e9f0a1b2c",

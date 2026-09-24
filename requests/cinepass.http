@@ -75,3 +75,29 @@ GET http://localhost:8080/api/fidelidade/33333333-3333-3333-3333-333333333333
 
 ### Trilha de auditoria da reserva (troque pelo reservaId)
 GET http://localhost:8080/api/auditoria/reserva/00000000-0000-0000-0000-000000000000
+
+### Saga orquestrada pelo Temporal com correlationId (caminho feliz)
+POST http://localhost:8080/api/reservas/temporal
+Content-Type: application/json
+X-Correlation-Id: demo-temporal-001
+
+{
+  "clienteId": "33333333-3333-3333-3333-333333333333",
+  "sessaoId": "22222222-2222-2222-2222-222222222222",
+  "assentos": ["B2"],
+  "simularRecusaPagamento": false,
+  "simularFalhaIngresso": false
+}
+
+### Saga no Temporal com falha no ingresso: compensação (estorno + ReservaCancelada), resposta 422
+POST http://localhost:8080/api/reservas/temporal
+Content-Type: application/json
+X-Correlation-Id: demo-temporal-002
+
+{
+  "clienteId": "33333333-3333-3333-3333-333333333333",
+  "sessaoId": "22222222-2222-2222-2222-222222222222",
+  "assentos": ["B3"],
+  "simularRecusaPagamento": false,
+  "simularFalhaIngresso": true
+}

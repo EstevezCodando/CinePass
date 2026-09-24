@@ -1,0 +1,36 @@
+
+==================================================================
+13. REPROCESSAMENTO: falha transitória (banco fora do ar) -> DLT -> correção -> reprocessamento
+==================================================================
+$ docker stop cinepass-postgres   (simula indisponibilidade do banco dos consumidores)
+$ publica um ReservaConfirmada (eventId=66666666-6666-6666-6666-174957000000, reservaId=55555555-5555-5555-5555-174957000000, clienteId=44444444-4444-4444-4444-174957000000) no tópico
+
+--- retentativas e envio ao DLT (fidelidade-service) ---
+kafka.evento.retry topic=reserva.eventos key=55555555-5555-5555-5555-174957000000 tentativa=1 motivo=PSQLException: This connection has been closed.
+kafka.evento.retry topic=reserva.eventos key=55555555-5555-5555-5555-174957000000 tentativa=2 motivo=UnknownHostException: postgres
+kafka.evento.retry topic=reserva.eventos key=55555555-5555-5555-5555-174957000000 tentativa=3 motivo=UnknownHostException: postgres
+kafka.evento.retry topic=reserva.eventos key=55555555-5555-5555-5555-174957000000 tentativa=4 motivo=UnknownHostException: postgres
+kafka.evento.dlt.encaminhado topicOrigem=reserva.eventos partition=5 offset=6 key=55555555-5555-5555-5555-174957000000 destino=reserva.eventos.fidelidade.dlt motivo=UnknownHostException: postgres
+
+$ docker start cinepass-postgres   (causa corrigida)
+
+ANTES do reprocessamento:
+ historico_do_cliente 
+----------------------
+                    0
+(1 row)
+
+$ ./infra/scripts/reprocessar-dlt.sh fidelidade
+Lendo mensagens pendentes de reserva.eventos.fidelidade.dlt...
+Ignorando 1 mensagem(ns) que não são eventos válidos (ficam no DLT para análise):
+  chave=mensagem-invalida-1790282934
+Republicando 1 mensagem(ns) em reserva.eventos...
+Concluído.
+
+DEPOIS do reprocessamento:
+              cliente_id              | reservas_confirmadas | ingressos_comprados | valor_total_gasto | pontos 
+--------------------------------------+----------------------+---------------------+-------------------+--------
+ 44444444-4444-4444-4444-174957000000 |                    1 |                   2 |             79.80 |     79
+(1 row)
+
+fidelidade.evento.processado.sucesso eventId=66666666-6666-6666-6666-174957000000 reservaId=55555555-5555-5555-5555-174957000000 clienteId=44444444-4444-4444-4444-174957000000 reservasConfirmadas=1 pontos=79 resultado=historico_atualizado

@@ -1,15 +1,16 @@
 package br.com.cinepass.reserva.infrastructure.temporal;
 
-import br.com.cinepass.reserva.application.exception.PagamentoRecusadoException;
+import br.com.cinepass.reserva.application.PagamentoRecusadoException;
 import br.com.cinepass.reserva.application.RealizarReservaCommand;
+import br.com.cinepass.reserva.application.ReservaCompensadaException;
 import br.com.cinepass.reserva.application.ReservaDetalhe;
 import br.com.cinepass.reserva.application.port.ReservaOrquestrador;
 import br.com.cinepass.reserva.infrastructure.temporal.workflow.RealizarReservaWorkflow;
+import br.com.cinepass.reserva.infrastructure.temporal.workflow.RealizarReservaWorkflowImpl;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowFailedException;
 import io.temporal.client.WorkflowOptions;
 import io.temporal.failure.ApplicationFailure;
-import io.temporal.workflow.Workflow;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -34,10 +35,19 @@ public class TemporalReservaOrquestrador implements ReservaOrquestrador {
         try {
             return workflow.realizar(command);
         }catch (WorkflowFailedException ex){
-            if(ex.getCause() instanceof ApplicationFailure failure && "PAGAMENTO_RECUSADO".equals(failure.getType())){
-                throw new PagamentoRecusadoException();
+            if(ex.getCause() instanceof ApplicationFailure failure){
+                if(RealizarReservaWorkflowImpl.TIPO_PAGAMENTO_RECUSADO.equals(failure.getType())){
+                    throw new PagamentoRecusadoException(detalhe(failure, 0));
+                }
+                if(RealizarReservaWorkflowImpl.TIPO_FALHA_EMISSAO_INGRESSO.equals(failure.getType())){
+                    throw new ReservaCompensadaException(failure.getOriginalMessage(), detalhe(failure, 0), detalhe(failure, 1));
+                }
             }
             throw ex;
         }
+    }
+
+    private static UUID detalhe(ApplicationFailure failure, int indice) {
+        return UUID.fromString(failure.getDetails().get(indice, String.class));
     }
 }

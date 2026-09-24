@@ -108,6 +108,8 @@ echo "--- auditoria_db ---"
 psql auditoria_db "SELECT event_type, event_id, correlation_id, occurred_at, recebido_em, particao, offset_kafka FROM auditoria_eventos WHERE reserva_id='$RESERVA' ORDER BY recebido_em;"
 echo "--- consulta via API Gateway: GET /api/fidelidade/$CLIENTE ---"
 curl -s "$GW/api/fidelidade/$CLIENTE"; echo
+echo "--- consulta posterior da auditoria via API Gateway: GET /api/auditoria/reserva/$RESERVA ---"
+curl -s "$GW/api/auditoria/reserva/$RESERVA" | sed 's/},{/},\n{/g'; echo
 } > "$OUT/05-persistencia-consumidores.txt"
 
 # ---------------------------------------------------------------------------
@@ -187,6 +189,9 @@ es_sql "SELECT \\\"@timestamp\\\", service, SUBSTRING(message, 1, 110) AS messag
 echo
 secao "   busca por reservaId=$RESERVA"
 es_sql "SELECT service, COUNT(*) AS linhas FROM \\\"cinepass-logs-*\\\" WHERE reservaId = '$RESERVA' GROUP BY service"
+EVT_CONF=$(docker exec cinepass-postgres psql -U cinepass -d cinepass_db -Atc "SELECT id FROM outbox_events WHERE aggregate_id='$RESERVA' AND event_type='ReservaConfirmada'")
+secao "   busca por eventId=$EVT_CONF (ReservaConfirmada)"
+es_sql "SELECT \\\"@timestamp\\\", service, SUBSTRING(message, 1, 55) AS message FROM \\\"cinepass-logs-*\\\" WHERE eventId = '$EVT_CONF' ORDER BY \\\"@timestamp\\\" LIMIT 20"
 } > "$OUT/09-logs-centralizados.txt"
 
 # ---------------------------------------------------------------------------
@@ -219,8 +224,41 @@ echo "Visualização: http://localhost:9411/zipkin/traces/$TRACE"
 } > "$OUT/11-zipkin.txt"
 
 # ---------------------------------------------------------------------------
+reservar_temporal() { # assento, correlationId, simularFalhaIngresso
+  curl -s -i -X POST "$GW/api/reservas/temporal" -H 'Content-Type: application/json' -H "X-Correlation-Id: $2" \
+    -d "{\"clienteId\":\"$CLIENTE\",\"sessaoId\":\"$SESSAO\",\"assentos\":[\"$1\"],\"simularRecusaPagamento\":false,\"simularFalhaIngresso\":$3}"
+}
 {
-secao "12. REPROCESSAMENTO: falha transitória (banco fora do ar) -> DLT -> correção -> reprocessamento"
+secao "12. SAGA NO TEMPORAL: correlationId nas activities e compensação (ReservaCancelada)"
+echo "\$ POST /api/reservas/temporal  (assento B4, X-Correlation-Id: $CORR-temporal-ok)"
+OK=$(reservar_temporal B4 "$CORR-temporal-ok" false)
+echo "$OK" | grep -E "^HTTP|^X-Correlation-Id"; echo "$OK" | grep -o '"status":"[A-Z_]*"' | head -1
+RT=$(echo "$OK" | reserva_id)
+echo
+echo "\$ POST /api/reservas/temporal  (assento B5, simularFalhaIngresso=true, X-Correlation-Id: $CORR-temporal-falha)"
+FT=$(reservar_temporal B5 "$CORR-temporal-falha" true)
+echo "$FT" | grep -E "^HTTP|^X-Correlation-Id"; echo "$FT" | grep -o '"title":"[^"]*"'
+RFT=$(echo "$FT" | reserva_id)
+sleep 8
+echo
+echo "--- reserva-service: estado final e eventos gravados na outbox (com o correlationId) ---"
+psql cinepass_db "SELECT r.status AS reserva, o.event_type, o.status, o.correlation_id FROM outbox_events o JOIN reservas r ON r.id = o.aggregate_id WHERE o.aggregate_id IN ('$RT','$RFT') ORDER BY o.created_at;"
+echo "--- pagamento_db: a compensação estornou o pagamento da reserva que falhou ---"
+psql pagamento_db "SELECT reserva_id, status FROM pagamentos WHERE reserva_id IN ('$RT','$RFT') ORDER BY criado_em;"
+echo "--- assentos disponíveis na sessão (B5 foi liberado pela compensação) ---"
+curl -s "$GW/api/sessoes" | grep -o '"assentosDisponiveis":\[[^]]*\]'
+echo
+echo "--- consumidores: ReservaCancelada recebido ---"
+psql notificacao_db "SELECT tipo, mensagem FROM notificacoes WHERE reserva_id='$RFT' ORDER BY criada_em;"
+psql auditoria_db "SELECT event_type, correlation_id FROM auditoria_eventos WHERE reserva_id='$RFT' ORDER BY recebido_em;"
+echo "--- logs das activities (reserva-service) e das chamadas ao pagamento com o mesmo correlationId ---"
+klogs reserva | grep "correlationId=$CORR-temporal-falha " | grep -E "reserva\.persistida"
+klogs pagamento | grep "correlationId=$CORR-temporal-falha "
+} > "$OUT/12-temporal-saga.txt"
+
+# ---------------------------------------------------------------------------
+{
+secao "13. REPROCESSAMENTO: falha transitória (banco fora do ar) -> DLT -> correção -> reprocessamento"
 CLI2="44444444-4444-4444-4444-$(date +%H%M%S)000000"
 RES2="55555555-5555-5555-5555-$(date +%H%M%S)000000"
 EVT2="66666666-6666-6666-6666-$(date +%H%M%S)000000"
@@ -247,6 +285,6 @@ echo
 echo "DEPOIS do reprocessamento:"
 psql fidelidade_db "SELECT cliente_id, reservas_confirmadas, ingressos_comprados, valor_total_gasto, pontos FROM clientes_fidelidade WHERE cliente_id='$CLI2';"
 klogs fidelidade | grep "$EVT2" | grep processado.sucesso | sed -E 's/.*(fidelidade\.evento.*)/\1/'
-} > "$OUT/12-reprocessamento.txt"
+} > "$OUT/13-reprocessamento.txt"
 
 echo "Evidências gravadas em $OUT/ (correlationId=$CORR, reservaId=$RESERVA)"

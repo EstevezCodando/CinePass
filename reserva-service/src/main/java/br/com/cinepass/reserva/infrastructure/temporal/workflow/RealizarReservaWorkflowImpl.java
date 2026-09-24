@@ -17,6 +17,10 @@ import java.time.Duration;
 @WorkflowImpl(taskQueues = "cinepass-reserva")
 public class RealizarReservaWorkflowImpl implements RealizarReservaWorkflow {
 
+    /** Tipos das falhas de negócio devolvidas ao TemporalReservaOrquestrador. */
+    public static final String TIPO_PAGAMENTO_RECUSADO = "PAGAMENTO_RECUSADO";
+    public static final String TIPO_FALHA_EMISSAO_INGRESSO = "FALHA_EMISSAO_INGRESSO";
+
     private final ActivityOptions options =
             ActivityOptions.newBuilder()
                     .setStartToCloseTimeout(Duration.ofSeconds(10))
@@ -48,8 +52,8 @@ public class RealizarReservaWorkflowImpl implements RealizarReservaWorkflow {
 
         if(!"APROVADO".equals(pagamento.status())){
             reservaActivity.cancelar(reserva.reservaId());
-            throw ApplicationFailure
-                    .newNonRetryableFailure("Pagamento Recusado", "PAGAMENTO RECUSADO");
+            throw ApplicationFailure.newNonRetryableFailure("Pagamento recusado", TIPO_PAGAMENTO_RECUSADO,
+                    reserva.reservaId().toString());
         }
         reserva = reservaActivity.confirmarPagamento(reserva.reservaId(),pagamento.pagamentoId());
         reserva = reservaActivity.iniciarEmissaoIngresso(reserva.reservaId());
@@ -60,10 +64,13 @@ public class RealizarReservaWorkflowImpl implements RealizarReservaWorkflow {
                     command.simularFalhaIngresso());
             return reservaActivity.confirmar(reserva.reservaId(),ingresso.ingressoId());
         }catch (ActivityFailure ex){
+            // compensação: estorna o pagamento e cancela a reserva (libera os assentos)
             pagamentoActivity.estornar(pagamento.pagamentoId());
             reservaActivity.cancelar(reserva.reservaId());
-            throw ApplicationFailure
-                    .newNonRetryableFailure("Pagamento Recusado", "PAGAMENTO RECUSADO");
+            throw ApplicationFailure.newNonRetryableFailure(
+                    "Falha na emissão do ingresso: pagamento estornado e reserva cancelada",
+                    TIPO_FALHA_EMISSAO_INGRESSO,
+                    reserva.reservaId().toString(), pagamento.pagamentoId().toString());
         }
     }
 }

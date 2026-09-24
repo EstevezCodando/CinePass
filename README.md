@@ -271,7 +271,7 @@ Serviços:
 | Notificação Service | http://localhost:8084 |
 | Fidelidade Service | http://localhost:8085 |
 | Auditoria Service | http://localhost:8086 |
-| PostgreSQL | localhost:5432 |
+| PostgreSQL | localhost:25432 |
 | Kafka (acesso externo) | localhost:9092 |
 | Kafka UI | http://localhost:8091 |
 | Temporal (gRPC) / Temporal UI | localhost:7233 / http://localhost:28081 |
@@ -780,29 +780,48 @@ reais com Testcontainers:
 | `fidelidade-service` `IdempotenciaFidelidadeIntegrationTest` | `ReservaConfirmada` duplicada conta uma vez só |
 | `fidelidade-service` `ClienteFidelidadeTest` | regra de pontos (unitário) |
 | `auditoria-service` `OrdenacaoPorReservaIntegrationTest` | a ordem dos eventos de uma reserva é preservada |
+| `reserva-service` `RealizarReservaWorkflowTest` | Saga no Temporal (servidor de testes em memória): caminho feliz, pagamento recusado, compensação e `correlationId` nas activities |
 
 O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda o
 `mvn verify` e valida o `docker-compose.yml` a cada push e pull request.
 
 ## Mudanças no ambiente em relação à versão inicial
 
-- O `docker-compose.yml` passou a incluir o **Temporal** (antes ficava em
-  `docker-compose-temporal.yaml`), porque o reserva-service registra workers na
-  inicialização e não sobe sem ele. A Temporal UI fica em http://localhost:28081.
+- O `docker-compose.yml` passou a incluir o **Temporal** (usando o mesmo
+  PostgreSQL), porque o reserva-service registra workers na inicialização e
+  não sobe sem ele. A Temporal UI fica em http://localhost:28081. O antigo
+  `docker-compose-temporal.yaml` foi removido: ele repetia o Temporal e usava
+  os mesmos nomes de container e portas do compose principal.
+- O PostgreSQL fica exposto em **localhost:25432**, que é o padrão do `DB_URL`
+  de todos os serviços (execução pela IDE, Opção 2).
 - O Kafka roda em **modo KRaft** (sem Zookeeper), com a imagem `apache/kafka`.
 - O Kafka UI está na porta **8091**.
 - O PostgreSQL sobe com `max_connections=300`: os 7 serviços com pool Hikari
   mais o Temporal passam do limite padrão de 100 conexões.
 
+## Fluxo orquestrado pelo Temporal
+
+O `POST /api/reservas/temporal` também gera os eventos, pela mesma outbox. O
+`correlationId` da requisição é levado ao workflow e às activities por um
+`ContextPropagator` do Temporal (`CorrelationIdContextPropagator`), então os
+eventos, os logs das activities e as chamadas ao pagamento/ingresso desse fluxo
+também carregam o identificador. As falhas de negócio voltam para a API como
+respostas 422:
+
+| Situação | Tipo da falha no workflow | Resposta |
+|---|---|---|
+| pagamento recusado | `PAGAMENTO_RECUSADO` | 422 "Pagamento recusado" (reserva cancelada) |
+| falha na emissão do ingresso | `FALHA_EMISSAO_INGRESSO` | 422 "Reserva cancelada por compensação da Saga" (pagamento estornado, reserva cancelada, `ReservaCancelada` publicado) |
+
+O teste `RealizarReservaWorkflowTest` roda o workflow no servidor de testes do
+Temporal e cobre os três caminhos e a propagação do `correlationId`.
+
 ## Limitações conhecidas
 
-- O fluxo `POST /api/reservas/temporal` (orquestrado pelo Temporal) também grava
-  eventos na outbox, mas as activities rodam fora da requisição HTTP, então
-  esses eventos saem sem `correlationId`.
 - O fluxo síncrono `POST /api/reservas` continua com o problema didático
   original (pagamento aprovado e ingresso com falha). O Outbox garante que
   **nenhum evento** é publicado nesse caso, mas o estorno do pagamento continua
-  sendo tema da Saga.
+  sendo tema da Saga (resolvido no fluxo `/api/reservas/temporal`).
 
 ## Documentação
 

@@ -38,6 +38,8 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
         } finally {
             MDC.remove("correlationId");
             MDC.remove("reservaId");
+            MDC.remove("eventId");
+            MDC.remove("eventType");
         }
     }
 }

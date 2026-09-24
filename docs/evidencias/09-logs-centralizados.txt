@@ -1,6 +1,6 @@
 
 ==================================================================
-9. LOGS CENTRALIZADOS (Elasticsearch/Kibana) — busca por correlationId=evidencia-20260923155207
+9. LOGS CENTRALIZADOS (Elasticsearch/Kibana) — busca por correlationId=evidencia-20260924174755
 ==================================================================
 --- linhas de log por serviço para este correlationId ---
       service      |    linhas     
@@ -16,53 +16,53 @@ reserva-service    |11
 --- linhas de log de todos os serviços, em ordem cronológica ---
        @timestamp       |      service      |                                                   message                                                    
 ------------------------+-------------------+--------------------------------------------------------------------------------------------------------------
-2026-09-23T18:52:08.233Z|api-gateway        |gateway.request.inicio method=POST path=/api/reservas correlationId=evidencia-20260923155207                  
-2026-09-23T18:52:08.344Z|reserva-service    |reserva.realizacao.inicio clienteId=33333333-3333-3333-3333-155207000000 sessaoId=22222222-2222-2222-2222-2222
-2026-09-23T18:52:08.388Z|reserva-service    |reserva.persistida reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 status=AGUARDANDO_PAGAMENTO eventos=1       
-2026-09-23T18:52:08.388Z|reserva-service    |reserva.outbox.registrado reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=33bfceaa-1ff5-40f3-b700-45a28
-2026-09-23T18:52:08.953Z|pagamento-service  |pagamento.processamento.inicio reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 valor=79.80                     
-2026-09-23T18:52:09.046Z|pagamento-service  |pagamento.processamento.fim reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 pagamentoId=ea2d6c35-e253-46bd-875b
-2026-09-23T18:52:09.205Z|reserva-service    |reserva.outbox.registrado reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=3ec38043-0349-4442-991c-b56de
-2026-09-23T18:52:09.205Z|reserva-service    |reserva.persistida reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 status=EMITINDO_INGRESSO eventos=1          
-2026-09-23T18:52:09.610Z|ingresso-service   |ingresso.emissao.inicio reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 assentos=[A1, A2]                      
-2026-09-23T18:52:09.728Z|ingresso-service   |ingresso.emissao.fim reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 ingressoId=69a714a0-cbe1-4c73-9e99-403840c
-2026-09-23T18:52:09.862Z|reserva-service    |reserva.outbox.registrado reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=914c5931-047b-4394-98c6-83c56
-2026-09-23T18:52:09.863Z|reserva-service    |reserva.persistida reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 status=CONFIRMADA eventos=1                 
-2026-09-23T18:52:09.865Z|reserva-service    |reserva.realizacao.sucesso reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 status=CONFIRMADA pagamentoId=ea2d6c
-2026-09-23T18:52:09.923Z|api-gateway        |gateway.request.fim method=POST path=/api/reservas status=201 CREATED durationMs=1690 correlationId=evidencia-
-2026-09-23T18:52:10.478Z|reserva-service    |reserva.outbox.publicado reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=33bfceaa-1ff5-40f3-b700-45a28d
-2026-09-23T18:52:10.507Z|reserva-service    |reserva.outbox.publicado reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=3ec38043-0349-4442-991c-b56de1
-2026-09-23T18:52:10.527Z|reserva-service    |reserva.outbox.publicado reservaId=893a19ad-9598-4083-9bb2-4029c44516b9 eventId=914c5931-047b-4394-98c6-83c567
-2026-09-23T18:52:11.068Z|notificacao-service|kafka.evento.recebido service=notificacao-service partition=0 offset=0 key=893a19ad-9598-4083-9bb2-4029c44516b
-2026-09-23T18:52:11.110Z|fidelidade-service |kafka.evento.recebido service=fidelidade-service partition=0 offset=2 key=893a19ad-9598-4083-9bb2-4029c44516b9
-2026-09-23T18:52:11.205Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partition=0 offset=0 key=893a19ad-9598-4083-9bb2-4029c44516b9 
-2026-09-23T18:52:11.986Z|fidelidade-service |fidelidade.evento.processado.sucesso eventId=914c5931-047b-4394-98c6-83c5671fef57 reservaId=893a19ad-9598-4083
-2026-09-23T18:52:12.023Z|auditoria-service  |auditoria.evento.processado.sucesso auditoriaId=fd7c6775-23ba-4d0e-9906-c3fb81e479f3 eventId=33bfceaa-1ff5-40f
-2026-09-23T18:52:12.120Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partition=0 offset=1 key=893a19ad-9598-4083-9bb2-4029c44516b9 
-2026-09-23T18:52:12.140Z|auditoria-service  |auditoria.evento.processado.sucesso auditoriaId=0015dfc3-c852-4a0e-a0a8-fda42d793d7a eventId=3ec38043-0349-444
-2026-09-23T18:52:12.178Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partition=0 offset=2 key=893a19ad-9598-4083-9bb2-4029c44516b9 
-2026-09-23T18:52:12.203Z|auditoria-service  |auditoria.evento.processado.sucesso auditoriaId=d28bad3b-0711-43ec-8665-67eb6519cefd eventId=914c5931-047b-439
-2026-09-23T18:52:12.249Z|notificacao-service|notificacao.evento.processado.sucesso eventId=33bfceaa-1ff5-40f3-b700-45a28d1247f8 eventType=ReservaCriada res
-2026-09-23T18:52:12.283Z|notificacao-service|kafka.evento.recebido service=notificacao-service partition=0 offset=1 key=893a19ad-9598-4083-9bb2-4029c44516b
-2026-09-23T18:52:12.293Z|notificacao-service|notificacao.evento.processado.sucesso eventId=3ec38043-0349-4442-991c-b56de1ba9cc5 eventType=ReservaPagamentoA
-2026-09-23T18:52:12.304Z|notificacao-service|kafka.evento.recebido service=notificacao-service partition=0 offset=2 key=893a19ad-9598-4083-9bb2-4029c44516b
-2026-09-23T18:52:12.313Z|notificacao-service|notificacao.evento.processado.sucesso eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada
-2026-09-23T18:52:47.649Z|fidelidade-service |kafka.evento.recebido service=fidelidade-service partition=0 offset=3 key=893a19ad-9598-4083-9bb2-4029c44516b9
-2026-09-23T18:52:47.649Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partition=0 offset=3 key=893a19ad-9598-4083-9bb2-4029c44516b9 
-2026-09-23T18:52:47.653Z|notificacao-service|kafka.evento.recebido service=notificacao-service partition=0 offset=3 key=893a19ad-9598-4083-9bb2-4029c44516b
-2026-09-23T18:52:47.656Z|fidelidade-service |fidelidade.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada 
-2026-09-23T18:52:47.656Z|auditoria-service  |auditoria.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada r
-2026-09-23T18:52:47.664Z|fidelidade-service |kafka.evento.recebido service=fidelidade-service partition=0 offset=4 key=893a19ad-9598-4083-9bb2-4029c44516b9
-2026-09-23T18:52:47.665Z|notificacao-service|notificacao.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada
-2026-09-23T18:52:47.670Z|fidelidade-service |fidelidade.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada 
-2026-09-23T18:52:47.676Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partition=0 offset=4 key=893a19ad-9598-4083-9bb2-4029c44516b9 
-2026-09-23T18:52:47.679Z|notificacao-service|kafka.evento.recebido service=notificacao-service partition=0 offset=4 key=893a19ad-9598-4083-9bb2-4029c44516b
-2026-09-23T18:52:47.680Z|auditoria-service  |auditoria.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada r
-2026-09-23T18:52:47.683Z|notificacao-service|notificacao.evento.duplicado.ignorado eventId=914c5931-047b-4394-98c6-83c5671fef57 eventType=ReservaConfirmada
+2026-09-24T20:47:55.886Z|api-gateway        |gateway.request.inicio method=POST path=/api/reservas correlationId=evidencia-20260924174755                  
+2026-09-24T20:47:56.035Z|reserva-service    |reserva.realizacao.inicio clienteId=33333333-3333-3333-3333-174755000000 sessaoId=22222222-2222-2222-2222-2222
+2026-09-24T20:47:56.108Z|reserva-service    |reserva.persistida reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 status=AGUARDANDO_PAGAMENTO eventos=1       
+2026-09-24T20:47:56.108Z|reserva-service    |reserva.outbox.registrado reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 eventId=bb7ceca0-dace-4ab3-badc-fda21
+2026-09-24T20:47:56.961Z|pagamento-service  |pagamento.processamento.inicio reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 valor=79.80                     
+2026-09-24T20:47:57.218Z|pagamento-service  |pagamento.processamento.fim reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 pagamentoId=afc20801-3886-4eef-822a
+2026-09-24T20:47:57.355Z|reserva-service    |reserva.persistida reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 status=EMITINDO_INGRESSO eventos=1          
+2026-09-24T20:47:57.355Z|reserva-service    |reserva.outbox.registrado reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 eventId=5cf2232f-2c8a-49fa-ba21-a33c2
+2026-09-24T20:47:57.798Z|ingresso-service   |ingresso.emissao.inicio reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 assentos=[A1, A2]                      
+2026-09-24T20:47:57.972Z|ingresso-service   |ingresso.emissao.fim reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 ingressoId=d73c806d-86df-4d51-b0c5-64b8bd0
+2026-09-24T20:47:58.130Z|reserva-service    |reserva.persistida reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 status=CONFIRMADA eventos=1                 
+2026-09-24T20:47:58.130Z|reserva-service    |reserva.outbox.registrado reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 eventId=8a15c551-4b3c-42c9-a4b6-040a9
+2026-09-24T20:47:58.131Z|reserva-service    |reserva.realizacao.sucesso reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 status=CONFIRMADA pagamentoId=afc208
+2026-09-24T20:47:58.178Z|api-gateway        |gateway.request.fim method=POST path=/api/reservas status=201 CREATED durationMs=2292 correlationId=evidencia-
+2026-09-24T20:47:58.807Z|reserva-service    |reserva.outbox.publicado reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 eventId=bb7ceca0-dace-4ab3-badc-fda21a
+2026-09-24T20:47:58.825Z|reserva-service    |reserva.outbox.publicado reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 eventId=5cf2232f-2c8a-49fa-ba21-a33c22
+2026-09-24T20:47:58.841Z|reserva-service    |reserva.outbox.publicado reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 eventId=8a15c551-4b3c-42c9-a4b6-040a97
+2026-09-24T20:47:59.183Z|notificacao-service|kafka.evento.recebido service=notificacao-service partition=0 offset=0 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c
+2026-09-24T20:47:59.345Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partition=0 offset=0 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 
+2026-09-24T20:47:59.458Z|fidelidade-service |kafka.evento.recebido service=fidelidade-service partition=0 offset=2 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c5
+2026-09-24T20:48:00.312Z|notificacao-service|notificacao.evento.processado.sucesso eventId=bb7ceca0-dace-4ab3-badc-fda21a33bb99 eventType=ReservaCriada res
+2026-09-24T20:48:00.441Z|notificacao-service|kafka.evento.recebido service=notificacao-service partition=0 offset=1 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c
+2026-09-24T20:48:00.470Z|notificacao-service|notificacao.evento.processado.sucesso eventId=5cf2232f-2c8a-49fa-ba21-a33c220bcd7b eventType=ReservaPagamentoA
+2026-09-24T20:48:00.496Z|notificacao-service|kafka.evento.recebido service=notificacao-service partition=0 offset=2 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c
+2026-09-24T20:48:00.532Z|notificacao-service|notificacao.evento.processado.sucesso eventId=8a15c551-4b3c-42c9-a4b6-040a97e90d7e eventType=ReservaConfirmada
+2026-09-24T20:48:00.591Z|fidelidade-service |fidelidade.evento.processado.sucesso eventId=8a15c551-4b3c-42c9-a4b6-040a97e90d7e reservaId=981b899d-d5fd-4463
+2026-09-24T20:48:00.932Z|auditoria-service  |auditoria.evento.processado.sucesso auditoriaId=82e25091-d458-489d-871c-714f3ff28f00 eventId=bb7ceca0-dace-4ab
+2026-09-24T20:48:01.001Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partition=0 offset=1 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 
+2026-09-24T20:48:01.025Z|auditoria-service  |auditoria.evento.processado.sucesso auditoriaId=46246dfc-49c4-489a-8c2c-198976c00dea eventId=5cf2232f-2c8a-49f
+2026-09-24T20:48:01.052Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partition=0 offset=2 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 
+2026-09-24T20:48:01.063Z|auditoria-service  |auditoria.evento.processado.sucesso auditoriaId=8a021d71-e452-41e2-b639-1ef8b1aa8abf eventId=8a15c551-4b3c-42c
+2026-09-24T20:48:34.658Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partition=0 offset=3 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 
+2026-09-24T20:48:34.664Z|fidelidade-service |kafka.evento.recebido service=fidelidade-service partition=0 offset=3 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c5
+2026-09-24T20:48:34.669Z|notificacao-service|kafka.evento.recebido service=notificacao-service partition=0 offset=3 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c
+2026-09-24T20:48:34.675Z|auditoria-service  |auditoria.evento.duplicado.ignorado eventId=8a15c551-4b3c-42c9-a4b6-040a97e90d7e eventType=ReservaConfirmada r
+2026-09-24T20:48:34.676Z|fidelidade-service |fidelidade.evento.duplicado.ignorado eventId=8a15c551-4b3c-42c9-a4b6-040a97e90d7e eventType=ReservaConfirmada 
+2026-09-24T20:48:34.679Z|notificacao-service|notificacao.evento.duplicado.ignorado eventId=8a15c551-4b3c-42c9-a4b6-040a97e90d7e eventType=ReservaConfirmada
+2026-09-24T20:48:34.683Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partition=0 offset=4 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c5 
+2026-09-24T20:48:34.686Z|auditoria-service  |auditoria.evento.duplicado.ignorado eventId=8a15c551-4b3c-42c9-a4b6-040a97e90d7e eventType=ReservaConfirmada r
+2026-09-24T20:48:34.687Z|notificacao-service|kafka.evento.recebido service=notificacao-service partition=0 offset=4 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c
+2026-09-24T20:48:34.703Z|notificacao-service|notificacao.evento.duplicado.ignorado eventId=8a15c551-4b3c-42c9-a4b6-040a97e90d7e eventType=ReservaConfirmada
+2026-09-24T20:48:34.706Z|fidelidade-service |kafka.evento.recebido service=fidelidade-service partition=0 offset=4 key=981b899d-d5fd-4463-82a0-c3c3f7cb36c5
+2026-09-24T20:48:34.709Z|fidelidade-service |fidelidade.evento.duplicado.ignorado eventId=8a15c551-4b3c-42c9-a4b6-040a97e90d7e eventType=ReservaConfirmada 
 
 
 ==================================================================
-   busca por reservaId=893a19ad-9598-4083-9bb2-4029c44516b9
+   busca por reservaId=981b899d-d5fd-4463-82a0-c3c3f7cb36c5
 ==================================================================
       service      |    linhas     
 -------------------+---------------
@@ -70,3 +70,29 @@ auditoria-service  |10
 fidelidade-service |6              
 notificacao-service|10             
 reserva-service    |15             
+
+==================================================================
+   busca por eventId=8a15c551-4b3c-42c9-a4b6-040a97e90d7e (ReservaConfirmada)
+==================================================================
+       @timestamp       |      service      |                        message                        
+------------------------+-------------------+-------------------------------------------------------
+2026-09-24T20:47:58.130Z|reserva-service    |reserva.outbox.registrado reservaId=981b899d-d5fd-4463-
+2026-09-24T20:47:58.841Z|reserva-service    |reserva.outbox.publicado reservaId=981b899d-d5fd-4463-8
+2026-09-24T20:47:59.458Z|fidelidade-service |kafka.evento.recebido service=fidelidade-service partit
+2026-09-24T20:48:00.496Z|notificacao-service|kafka.evento.recebido service=notificacao-service parti
+2026-09-24T20:48:00.532Z|notificacao-service|notificacao.evento.processado.sucesso eventId=8a15c551-
+2026-09-24T20:48:00.591Z|fidelidade-service |fidelidade.evento.processado.sucesso eventId=8a15c551-4
+2026-09-24T20:48:01.052Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partiti
+2026-09-24T20:48:01.063Z|auditoria-service  |auditoria.evento.processado.sucesso auditoriaId=8a021d7
+2026-09-24T20:48:34.658Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partiti
+2026-09-24T20:48:34.664Z|fidelidade-service |kafka.evento.recebido service=fidelidade-service partit
+2026-09-24T20:48:34.669Z|notificacao-service|kafka.evento.recebido service=notificacao-service parti
+2026-09-24T20:48:34.675Z|auditoria-service  |auditoria.evento.duplicado.ignorado eventId=8a15c551-4b
+2026-09-24T20:48:34.676Z|fidelidade-service |fidelidade.evento.duplicado.ignorado eventId=8a15c551-4
+2026-09-24T20:48:34.679Z|notificacao-service|notificacao.evento.duplicado.ignorado eventId=8a15c551-
+2026-09-24T20:48:34.683Z|auditoria-service  |kafka.evento.recebido service=auditoria-service partiti
+2026-09-24T20:48:34.686Z|auditoria-service  |auditoria.evento.duplicado.ignorado eventId=8a15c551-4b
+2026-09-24T20:48:34.687Z|notificacao-service|kafka.evento.recebido service=notificacao-service parti
+2026-09-24T20:48:34.703Z|notificacao-service|notificacao.evento.duplicado.ignorado eventId=8a15c551-
+2026-09-24T20:48:34.706Z|fidelidade-service |kafka.evento.recebido service=fidelidade-service partit
+2026-09-24T20:48:34.709Z|fidelidade-service |fidelidade.evento.duplicado.ignorado eventId=8a15c551-4

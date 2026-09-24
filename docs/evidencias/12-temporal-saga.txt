@@ -1,0 +1,58 @@
+
+==================================================================
+12. SAGA NO TEMPORAL: correlationId nas activities e compensação (ReservaCancelada)
+==================================================================
+$ POST /api/reservas/temporal  (assento B4, X-Correlation-Id: evidencia-20260924174755-temporal-ok)
+HTTP/1.1 201 Created
+X-Correlation-Id: evidencia-20260924174755-temporal-ok
+"status":"CONFIRMADA"
+
+$ POST /api/reservas/temporal  (assento B5, simularFalhaIngresso=true, X-Correlation-Id: evidencia-20260924174755-temporal-falha)
+HTTP/1.1 422 Unprocessable Entity
+X-Correlation-Id: evidencia-20260924174755-temporal-falha
+"title":"Reserva cancelada por compensação da Saga"
+
+--- reserva-service: estado final e eventos gravados na outbox (com o correlationId) ---
+  reserva   |        event_type        |  status   |             correlation_id              
+------------+--------------------------+-----------+-----------------------------------------
+ CONFIRMADA | ReservaCriada            | PUBLICADO | evidencia-20260924174755-temporal-ok
+ CONFIRMADA | ReservaPagamentoAprovado | PUBLICADO | evidencia-20260924174755-temporal-ok
+ CONFIRMADA | ReservaConfirmada        | PUBLICADO | evidencia-20260924174755-temporal-ok
+ CANCELADA  | ReservaCriada            | PUBLICADO | evidencia-20260924174755-temporal-falha
+ CANCELADA  | ReservaPagamentoAprovado | PUBLICADO | evidencia-20260924174755-temporal-falha
+ CANCELADA  | ReservaCancelada         | PUBLICADO | evidencia-20260924174755-temporal-falha
+(6 rows)
+
+--- pagamento_db: a compensação estornou o pagamento da reserva que falhou ---
+              reserva_id              |  status   
+--------------------------------------+-----------
+ e51de908-d49d-4215-8580-324ea26fc301 | APROVADO
+ 66b4c5f7-a5d2-4630-9964-a984b32ee348 | ESTORNADO
+(2 rows)
+
+--- assentos disponíveis na sessão (B5 foi liberado pela compensação) ---
+"assentosDisponiveis":["B5"]
+
+--- consumidores: ReservaCancelada recebido ---
+        tipo        |                               mensagem                               
+--------------------+----------------------------------------------------------------------
+ RESERVA_CRIADA     | Recebemos sua reserva dos assentos [B5]. Aguardando o pagamento.
+ PAGAMENTO_APROVADO | O pagamento de R$ 39.90 foi aprovado. Estamos emitindo seu ingresso.
+ RESERVA_CANCELADA  | Sua reserva foi cancelada e os assentos foram liberados.
+(3 rows)
+
+        event_type        |             correlation_id              
+--------------------------+-----------------------------------------
+ ReservaCriada            | evidencia-20260924174755-temporal-falha
+ ReservaPagamentoAprovado | evidencia-20260924174755-temporal-falha
+ ReservaCancelada         | evidencia-20260924174755-temporal-falha
+(3 rows)
+
+--- logs das activities (reserva-service) e das chamadas ao pagamento com o mesmo correlationId ---
+2026-09-24 20:49:46.024 INFO  service=reserva-service traceId= spanId= correlationId=evidencia-20260924174755-temporal-falha reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 thread=Activity Executor taskQueue="cinepass-reserva", namespace="default": 1 logger=b.c.c.r.a.ReservaApplicationService - reserva.persistida reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 status=AGUARDANDO_PAGAMENTO eventos=1
+2026-09-24 20:49:46.186 INFO  service=reserva-service traceId= spanId= correlationId=evidencia-20260924174755-temporal-falha reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 thread=Activity Executor taskQueue="cinepass-reserva", namespace="default": 1 logger=b.c.c.r.a.ReservaApplicationService - reserva.persistida reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 status=PAGAMENTO_APROVADO eventos=1
+2026-09-24 20:49:46.267 INFO  service=reserva-service traceId= spanId= correlationId=evidencia-20260924174755-temporal-falha reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 thread=Activity Executor taskQueue="cinepass-reserva", namespace="default": 1 logger=b.c.c.r.a.ReservaApplicationService - reserva.persistida reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 status=EMITINDO_INGRESSO eventos=0
+2026-09-24 20:49:46.745 INFO  service=reserva-service traceId= spanId= correlationId=evidencia-20260924174755-temporal-falha reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 thread=Activity Executor taskQueue="cinepass-reserva", namespace="default": 1 logger=b.c.c.r.a.ReservaApplicationService - reserva.persistida reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 status=CANCELADA eventos=1
+2026-09-24 20:49:46.086 INFO  service=pagamento-service traceId=6ab58ceaf8ae2178bbef6f2a5df97d29 spanId=6b266e0e5967363f correlationId=evidencia-20260924174755-temporal-falha thread=http-nio-8082-exec-10 logger=b.c.c.p.a.PagamentoApplicationService - pagamento.processamento.inicio reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 valor=39.90
+2026-09-24 20:49:46.088 INFO  service=pagamento-service traceId=6ab58ceaf8ae2178bbef6f2a5df97d29 spanId=6b266e0e5967363f correlationId=evidencia-20260924174755-temporal-falha thread=http-nio-8082-exec-10 logger=b.c.c.p.a.PagamentoApplicationService - pagamento.processamento.fim reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 pagamentoId=b43223c8-a8f1-4802-9767-a5c55a029cfa status=APROVADO
+2026-09-24 20:49:46.592 INFO  service=pagamento-service traceId=6ab58cea23627dc44996d7e112ed4756 spanId=f687a09030d7cbe6 correlationId=evidencia-20260924174755-temporal-falha thread=http-nio-8082-exec-1 logger=b.c.c.p.a.PagamentoApplicationService - pagamento.estorno pagamentoId=b43223c8-a8f1-4802-9767-a5c55a029cfa reservaId=66b4c5f7-a5d2-4630-9964-a984b32ee348 status=ESTORNADO

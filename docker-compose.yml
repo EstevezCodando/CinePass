@@ -76,8 +76,10 @@ services:
       POSTGRES_USER: cinepass
       POSTGRES_PASSWORD: cinepass
       POSTGRES_DB: postgres
+    # Porta 25432 no host: é o padrão do DB_URL de todos os serviços, para rodar
+    # as aplicações pela IDE contra este mesmo PostgreSQL.
     ports:
-      - "5432:5432"
+      - "25432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro

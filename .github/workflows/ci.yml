@@ -6,15 +6,17 @@ on:
   pull_request:
     branches: ["**"]
 
+# Actions em versões que já rodam em Node.js 24 e runner fixo (ubuntu-24.04):
+# evita os avisos de depreciação do Node 20 e da migração do ubuntu-latest.
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configurar JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "21"
@@ -28,16 +30,16 @@ jobs:
 
       - name: Publicar relatórios de teste
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: relatorios-de-teste
           path: "**/target/surefire-reports/*.txt"
           if-no-files-found: ignore
 
   validar-docker-compose:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Validar docker-compose.yml
         run: docker compose config -q
